@@ -57,10 +57,12 @@
 
 <script setup>
 // import
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { v4 as uuidv4 } from "uuid";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/firebase";
 
-// todo
+// todos
 const todos = ref([
   // {
   //   id: "id1",
@@ -73,6 +75,22 @@ const todos = ref([
   //   done: true,
   // },
 ]);
+
+// get todos:
+onMounted(async () => {
+  const querySnapshot = await getDocs(collection(db, "todos"));
+  let fbTodos = [];
+  querySnapshot.forEach((doc) => {
+    console.log(doc.id, " => ", doc.data());
+    const todo = {
+      id: doc.id,
+      content: doc.data().content,
+      done: doc.data().done,
+    };
+    fbTodos.push(todo);
+  });
+  todos.value = fbTodos;
+});
 
 // add todo
 const newtodoContent = ref("");
@@ -112,4 +130,3 @@ const toggleDone = (id) => {
   text-decoration: line-through;
 }
 </style>
-
