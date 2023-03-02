@@ -58,26 +58,25 @@
 <script setup>
 // import
 import { ref, onMounted } from "vue";
-import { collection, onSnapshot, addDoc } from "firebase/firestore";
+import {
+  collection,
+  onSnapshot,
+  addDoc,
+  deleteDoc,
+  updateDoc,
+  doc,
+} from "firebase/firestore";
 import { db } from "@/firebase";
 
-// todos
-const todos = ref([
-  // {
-  //   id: "id1",
-  //   content: "hello guys",
-  //   done: false,
-  // },
-  // {
-  //   id: "id2",
-  //   content: "check me!",
-  //   done: true,
-  // },
-]);
+// firebase ref
+const todosCollectionRef = collection(db, "todos");
 
-// get todos:
+// todos
+const todos = ref([]);
+
+// get todos
 onMounted(() => {
-  onSnapshot(collection(db, "todos"), (querySnapshot) => {
+  onSnapshot(todosCollectionRef, (querySnapshot) => {
     const fbTodos = [];
     querySnapshot.forEach((doc) => {
       const todo = {
@@ -93,9 +92,8 @@ onMounted(() => {
 
 // add todo
 const newtodoContent = ref("");
-
 const addTodo = () => {
-  addDoc(collection(db, "todos"), {
+  addDoc(todosCollectionRef, {
     content: newtodoContent.value,
     done: false,
   });
@@ -104,14 +102,15 @@ const addTodo = () => {
 
 // delete todo
 const deleteTodo = (id) => {
-  todos.value = todos.value.filter((todo) => todo.id !== id);
+  deleteDoc(doc(todosCollectionRef, id));
 };
 
 // toggle done
-
 const toggleDone = (id) => {
   const index = todos.value.findIndex((todo) => todo.id === id);
-  todos.value[index].done = !todos.value[index].done;
+  updateDoc(doc(todosCollectionRef, id), {
+    done: !todos.value[index].done,
+  });
 };
 </script>
 
