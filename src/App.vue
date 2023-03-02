@@ -59,7 +59,7 @@
 // import
 import { ref, onMounted } from "vue";
 import { v4 as uuidv4 } from "uuid";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "@/firebase";
 
 // todos
@@ -77,19 +77,19 @@ const todos = ref([
 ]);
 
 // get todos:
-onMounted(async () => {
-  const querySnapshot = await getDocs(collection(db, "todos"));
-  let fbTodos = [];
-  querySnapshot.forEach((doc) => {
-    console.log(doc.id, " => ", doc.data());
-    const todo = {
-      id: doc.id,
-      content: doc.data().content,
-      done: doc.data().done,
-    };
-    fbTodos.push(todo);
+onMounted(() => {
+  onSnapshot(collection(db, "todos"), (querySnapshot) => {
+    const fbTodos = [];
+    querySnapshot.forEach((doc) => {
+      const todo = {
+        id: doc.id,
+        content: doc.data().content,
+        done: doc.data().done,
+      };
+      fbTodos.push(todo);
+    });
+    todos.value = fbTodos;
   });
-  todos.value = fbTodos;
 });
 
 // add todo
