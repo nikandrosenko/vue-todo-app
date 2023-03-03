@@ -75,30 +75,26 @@
 <script setup>
 // import
 import { ref, onMounted } from "vue";
-import {
-  collection,
-  onSnapshot,
-  addDoc,
-  deleteDoc,
-  updateDoc,
-  doc,
-  query,
-  orderBy,
-} from "firebase/firestore";
+import { collection, onSnapshot, addDoc } from "firebase/firestore";
 import { db } from "@/firebase";
 
-// firebase ref
-const todosCollectionRef = collection(db, "todos");
-
-const todosCollectionQuery = query(todosCollectionRef, orderBy("date", "desc"));
-
 // todos
-const todos = ref([]);
-const todosBack = ref([]);
+const todos = ref([
+  // {
+  //   id: "id1",
+  //   content: "hello guys",
+  //   done: false,
+  // },
+  // {
+  //   id: "id2",
+  //   content: "check me!",
+  //   done: true,
+  // },
+]);
 
 // get todos
 onMounted(() => {
-  onSnapshot(todosCollectionQuery, (querySnapshot) => {
+  onSnapshot(collection(db, "todos"), (querySnapshot) => {
     const fbTodos = [];
     querySnapshot.forEach((doc) => {
       const todo = {
@@ -132,21 +128,7 @@ const deleteTodo = (id) => {
 // toggle done
 const toggleDone = (id) => {
   const index = todos.value.findIndex((todo) => todo.id === id);
-  updateDoc(doc(todosCollectionRef, id), {
-    done: !todos.value[index].done,
-  });
-};
-// show only by status
-const showOnly = (status) => {
-  if (status === "done") {
-    todos.value = todosBack.value;
-    todos.value = todos.value.filter((todo) => todo.done);
-  } else if (status === "open") {
-    todos.value = todosBack.value;
-    todos.value = todos.value.filter((todo) => !todo.done);
-  } else {
-    todos.value = todosBack.value;
-  }
+  todos.value[index].done = !todos.value[index].done;
 };
 </script>
 
