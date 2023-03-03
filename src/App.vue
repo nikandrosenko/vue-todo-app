@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper-todo">
-    <div class="title has-text-centered">My ToDo List!</div>
+    <div class="title has-text-centered has-text-light">My ToDo List!</div>
     <form @submit.prevent="addTodo">
       <div class="field is-grouped mb-5">
         <p class="control is-expanded">
@@ -12,12 +12,29 @@
           />
         </p>
         <p class="control">
-          <button :disabled="!newtodoContent" class="button is-info">
+          <button :disabled="!newtodoContent" class="button is-light">
             Add
           </button>
         </p>
       </div>
     </form>
+    <div class="is-flex is-justify-content-space-between">
+      <button
+        @click="showOnly('done')"
+        class="button is-success mb-5 mr-5 is-fullwidth"
+      >
+        Done
+      </button>
+      <button
+        @click="showOnly('open')"
+        class="button is-info mb-5 mr-5 is-fullwidth"
+      >
+        Open
+      </button>
+      <button @click="showOnly()" class="button is-light mb-5 is-fullwidth">
+        All
+      </button>
+    </div>
     <div
       v-for="todo in todos"
       :ker="todo.id"
@@ -31,7 +48,7 @@
               class="column"
               :class="{ 'has-text-success line-through': todo.done }"
             >
-              {{ todo.content }}
+              {{ todo.content }} {{ todo.date }}
             </div>
             <div class="column is-5 has-text-right">
               <button
@@ -77,6 +94,7 @@ const todosCollectionQuery = query(todosCollectionRef, orderBy("date", "desc"));
 
 // todos
 const todos = ref([]);
+const todosBack = ref([]);
 
 // get todos
 onMounted(() => {
@@ -91,6 +109,7 @@ onMounted(() => {
       fbTodos.push(todo);
     });
     todos.value = fbTodos;
+    todosBack.value = fbTodos;
   });
 });
 
@@ -117,11 +136,27 @@ const toggleDone = (id) => {
     done: !todos.value[index].done,
   });
 };
+// show only by status
+const showOnly = (status) => {
+  if (status === "done") {
+    todos.value = todosBack.value;
+    todos.value = todos.value.filter((todo) => todo.done);
+  } else if (status === "open") {
+    todos.value = todosBack.value;
+    todos.value = todos.value.filter((todo) => !todo.done);
+  } else {
+    todos.value = todosBack.value;
+  }
+};
 </script>
 
 <style>
 @import "bulma/css/bulma.min.css";
 
+body {
+  min-height: 100vh;
+  background-color: #333;
+}
 .wrapper-todo {
   max-width: 400px;
   padding: 20px;
